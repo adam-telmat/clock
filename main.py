@@ -7,6 +7,6 @@ while True:
     # Save the valeur in a variable
     current_time = time.strftime("%H:%M:%S")
     # Print the current time
-    print(f"Hora actual: {current_time}")
+    print(current_time)
     # Wait one second
     time.sleep(1)
