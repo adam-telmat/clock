@@ -106,7 +106,7 @@ def menu():
                 s = int(input("Secondes (0-59) : "))
                 if 0 <= h < 24 and 0 <= m < 60 and 0 <= s < 60:
                     horloge.regler_alarme(h, m, s)
-                    lancer_horloge(horloge)
+                    lancer_horloge(horloge)  # Permet de rester dans l'affichage après l'alarme
                 else:
                     print("Valeurs invalides.")
             except ValueError:
@@ -128,3 +128,4 @@ def menu():
 
 if __name__ == "__main__":
     menu()
+
