@@ -2,9 +2,21 @@ import time
 import datetime
 ##Creating an alarm
 
+def input_time_check(alarm_time):
+    try:
+        datetime.datetime.strptime(alarm_time, "%H:%M:%S")
+        return True
+    except ValueError:
+        return False
+
 def set_alarm():
     #Asking grandma when she wants our alarm to ring
-    alarm_time=input("Choose at what time the alarm should ring (HH:MM:SS): ")
+    alarm_time=""
+    while not input_time_check(alarm_time):
+        alarm_time=input("Choose at what time the alarm should ring (HH:MM:SS): ")
+        if not input_time_check(alarm_time):
+                print("Grandma, you're getting old. You seem to have lost the ability to read an hour !")
+    # return alarm_time
 
     #Getting the hour, minutes, seconds from grandma's choice
     alarm_hour=alarm_time[0:2]
