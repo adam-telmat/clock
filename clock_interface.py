@@ -1,6 +1,7 @@
 import time
 from datetime import datetime, timedelta
 import threading
+import customtkinter
 
 class Horloge:
     def __init__(self):
