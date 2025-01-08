@@ -38,15 +38,23 @@ class Clock:
 
             time.sleep(1)
 
-    def set_alarm(self, h, m, s):
+    def set_time_from_tuple(self, time_tuple):
         """
-        Sets an alarm for a specific time.
+        Sets the time using a tuple (hours, minutes, seconds).
+        This will convert the tuple into a datetime object.
+        """
+        h, m, s = time_tuple
+        self.current_time = self.current_time.replace(hour=h, minute=m, second=s)
+        print(f"Time successfully set to {h:02d}:{m:02d}:{s:02d}")
+
+    def set_alarm(self, time_tuple):
+        """
+        Sets an alarm for a specific time using a tuple (hours, minutes, seconds).
 
         Args:
-            h (int): Hour (0-23)
-            m (int): Minute (0-59)
-            s (int): Second (0-59)
+            time_tuple (tuple): Tuple containing (hour, minute, second).
         """
+        h, m, s = time_tuple
         self.alarm = self.current_time.replace(hour=h, minute=m, second=s)
         print(f"Alarm set for {h:02d}:{m:02d}:{s:02d}")
 
@@ -56,7 +64,7 @@ class Clock:
         """
         self.mode_12h = not self.mode_12h
         mode = "12-hour" if self.mode_12h else "24-hour"
-        print(f"Mode changed to {mode}")
+        # print(f"Mode changed to {mode}")
 
     def toggle_pause(self):
         """
@@ -120,8 +128,7 @@ def menu():
                 m = int(input("Minutes (0-59): "))
                 s = int(input("Seconds (0-59): "))
                 if 0 <= h < 24 and 0 <= m < 60 and 0 <= s < 60:
-                    clock.current_time = clock.current_time.replace(hour=h, minute=m, second=s)
-                    print("Time successfully set.")
+                    clock.set_time_from_tuple((h, m, s))  # On passe le tuple ici
                     run_clock(clock)
                 else:
                     print("Invalid values.")
@@ -134,7 +141,7 @@ def menu():
                 m = int(input("Minutes (0-59): "))
                 s = int(input("Seconds (0-59): "))
                 if 0 <= h < 24 and 0 <= m < 60 and 0 <= s < 60:
-                    clock.set_alarm(h, m, s)
+                    clock.set_alarm((h, m, s))  # Passer le tuple directement ici
                     run_clock(clock)
                 else:
                     print("Invalid values.")
@@ -157,5 +164,6 @@ def menu():
 
 if __name__ == "__main__":
     menu()
+
 
 

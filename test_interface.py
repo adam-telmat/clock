@@ -1,162 +1,166 @@
-import customtkinter as ctk
 import time
 from datetime import datetime, timedelta
 import threading
 
-class HorlogeGUI:
+class Clock:
     def __init__(self):
-        # Configuration de base de CustomTkinter
-        ctk.set_appearance_mode("dark")
-        ctk.set_default_color_theme("blue")
-
-        # Configuration principale de la fenêtre
-        self.root = ctk.CTk()
-        self.root.title("Horloge Élégante")
-        self.root.geometry("800x600")
-
-        # Variables de l'horloge
-        self.heure_actuelle = datetime.now()
-        self.alarme = None
+        """
+        Initializes the clock with the current time, no alarm, 24-hour mode, and not paused.
+        """
+        self.current_time = datetime.now()
+        self.alarm = None
         self.mode_12h = False
-        self.pause = False
-        self.running = True
+        self.paused = False
+        self.is_running = False
 
-        # Création de l'interface
-        self.creer_interface()
-        
-        # Démarrer le thread de l'horloge
-        self.thread_horloge = threading.Thread(target=self.actualiser_heure, daemon=True)
-        self.thread_horloge.start()
+    def display_time(self):
+        """
+        Continuously displays the current time, updating every second.
+        If an alarm is set, it will notify the user when the alarm time is reached.
+        """
+        self.is_running = True
+        self.pause_message_shown = False
+        while self.is_running:
+            if not self.paused:
+                displayed_time = self.current_time.strftime("%I:%M:%S %p" if self.mode_12h else "%H:%M:%S")
+                print(displayed_time, end="\r")
 
-    def creer_interface(self):
-        # Frame principale
-        self.frame_principale = ctk.CTkFrame(self.root)
-        self.frame_principale.pack(pady=20, padx=20, fill="both", expand=True)
+                if self.alarm and self.current_time.strftime("%H:%M:%S") == self.alarm.strftime("%H:%M:%S"):
+                    print("\nALARM! It's time!")
+                    self.alarm = None  # Disable the alarm after it rings
 
-        # Affichage de l'heure
-        self.label_heure = ctk.CTkLabel(
-            self.frame_principale, 
-            text="00:00:00",
-            font=ctk.CTkFont(size=60, weight="bold")
-        )
-        self.label_heure.pack(pady=30)
+                self.current_time += timedelta(seconds=1)
+                self.pause_message_shown = False
+            else:
+                if not self.pause_message_shown:
+                    print(f"Clock paused - {self.current_time.strftime('%H:%M:%S')}", end="\r")
+                    self.pause_message_shown = True
 
-        # Frame pour les boutons
-        self.frame_boutons = ctk.CTkFrame(self.frame_principale)
-        self.frame_boutons.pack(pady=20)
-
-        # Boutons
-        self.btn_regler_heure = ctk.CTkButton(
-            self.frame_boutons,
-            text="Régler l'heure",
-            command=self.fenetre_regler_heure
-        )
-        self.btn_regler_heure.pack(pady=10)
-
-        self.btn_alarme = ctk.CTkButton(
-            self.frame_boutons,
-            text="Régler l'alarme",
-            command=self.fenetre_regler_alarme
-        )
-        self.btn_alarme.pack(pady=10)
-
-        self.btn_mode = ctk.CTkButton(
-            self.frame_boutons,
-            text="Changer mode 12h/24h",
-            command=self.changer_mode
-        )
-        self.btn_mode.pack(pady=10)
-
-        self.btn_pause = ctk.CTkButton(
-            self.frame_boutons,
-            text="Pause/Reprendre",
-            command=self.basculer_pause
-        )
-        self.btn_pause.pack(pady=10)
-
-        # Status
-        self.label_status = ctk.CTkLabel(
-            self.frame_principale,
-            text="En marche",
-            font=ctk.CTkFont(size=14)
-        )
-        self.label_status.pack(pady=20)
-
-    def fenetre_regler_heure(self):
-        dialog = ctk.CTkInputDialog(
-            text="Entrez l'heure (format HH:MM:SS):",
-            title="Régler l'heure"
-        )
-        result = dialog.get_input()
-        if result:
-            try:
-                h, m, s = map(int, result.split(':'))
-                self.heure_actuelle = self.heure_actuelle.replace(hour=h, minute=m, second=s)
-            except:
-                self.montrer_erreur("Format invalide! Utilisez HH:MM:SS")
-
-    def fenetre_regler_alarme(self):
-        dialog = ctk.CTkInputDialog(
-            text="Entrez l'heure de l'alarme (format HH:MM:SS):",
-            title="Régler l'alarme"
-        )
-        result = dialog.get_input()
-        if result:
-            try:
-                h, m, s = map(int, result.split(':'))
-                self.alarme = self.heure_actuelle.replace(hour=h, minute=m, second=s)
-                self.montrer_info(f"Alarme réglée pour {h:02d}:{m:02d}:{s:02d}")
-            except:
-                self.montrer_erreur("Format invalide! Utilisez HH:MM:SS")
-
-    def changer_mode(self):
-        self.mode_12h = not self.mode_12h
-        mode = "12h" if self.mode_12h else "24h"
-        self.montrer_info(f"Mode changé en {mode}")
-
-    def basculer_pause(self):
-        self.pause = not self.pause
-        etat = "en pause" if self.pause else "en marche"
-        self.label_status.configure(text=f"Horloge {etat}")
-
-    def actualiser_heure(self):
-        while self.running:
-            if not self.pause:
-                if self.mode_12h:
-                    heure_affichee = self.heure_actuelle.strftime("%I:%M:%S %p")
-                else:
-                    heure_affichee = self.heure_actuelle.strftime("%H:%M:%S")
-                
-                self.label_heure.configure(text=heure_affichee)
-                
-                if self.alarme and self.heure_actuelle.strftime("%H:%M:%S") == self.alarme.strftime("%H:%M:%S"):
-                    self.montrer_alarme()
-                
-                self.heure_actuelle += timedelta(seconds=1)
             time.sleep(1)
 
-    def montrer_erreur(self, message):
-        dialog = ctk.CTkInputDialog(title="Erreur", text=message)
-        dialog.destroy()
+    def set_time_from_tuple(self, time_tuple):
+        """
+        Sets the time using a tuple (hours, minutes, seconds).
+        This will convert the tuple into a datetime object.
+        """
+        h, m, s = time_tuple
+        self.current_time = self.current_time.replace(hour=h, minute=m, second=s)
+        print(f"Time successfully set to {h:02d}:{m:02d}:{s:02d}")
 
-    def montrer_info(self, message):
-        dialog = ctk.CTkInputDialog(title="Information", text=message)
-        dialog.destroy()
+    def set_alarm(self, time_tuple):
+        """
+        Sets an alarm for a specific time using a tuple (hours, minutes, seconds).
 
-    def montrer_alarme(self):
-        dialog = ctk.CTkInputDialog(title="ALARME!", text="DRING DRING ! C'est l'heure !")
-        dialog.destroy()
+        Args:
+            time_tuple (tuple): Tuple containing (hour, minute, second).
+        """
+        h, m, s = time_tuple
+        self.alarm = self.current_time.replace(hour=h, minute=m, second=s)
+        print(f"Alarm set for {h:02d}:{m:02d}:{s:02d}")
 
-    def demarrer(self):
-        self.root.mainloop()
+    def toggle_mode(self):
+        """
+        Toggles the clock display mode between 12-hour and 24-hour formats.
+        """
+        self.mode_12h = not self.mode_12h
+        mode = "12-hour" if self.mode_12h else "24-hour"
+        # print(f"Mode changed to {mode}")
 
-    def arreter(self):
-        self.running = False
-        self.root.quit()
+    def toggle_pause(self):
+        """
+        Toggles the clock between paused and running states.
+        """
+        self.paused = not self.paused
+        state = "paused" if self.paused else "running"
+        print(f"Clock is now {state}")
+
+    def stop_clock(self):
+        """
+        Stops the clock.
+        """
+        self.is_running = False
+
+
+def run_clock(clock):
+    """
+    Starts the clock in a continuous loop. The user can press Ctrl+C to stop and return to the menu.
+
+    Args:
+        clock (Clock): The clock object to run.
+    """
+    print("Press Ctrl+C to return to the menu")
+    try:
+        if not clock.is_running:
+            display_thread = threading.Thread(target=clock.display_time)
+            display_thread.daemon = True
+            display_thread.start()
+
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        clock.stop_clock()
+        print("\nReturning to menu")
+
+
+def menu():
+    """
+    Displays the main menu for the clock program, allowing the user to choose various options.
+    """
+    clock = Clock()
+
+    while True:
+        print("\n=== MENU ===")
+        print("1. Display the current time in real-time")
+        print("2. Set the time")
+        print("3. Set an alarm")
+        print("4. Change display mode (12-hour/24-hour)")
+        print("5. Pause/Resume the clock")
+        print("6. Exit")
+
+        choice = input("\nYour choice: ")
+
+        if choice == "1":
+            run_clock(clock)
+
+        elif choice == "2":
+            try:
+                h = int(input("Hours (0-23): "))
+                m = int(input("Minutes (0-59): "))
+                s = int(input("Seconds (0-59): "))
+                if 0 <= h < 24 and 0 <= m < 60 and 0 <= s < 60:
+                    clock.set_time_from_tuple((h, m, s))  # On passe le tuple ici
+                    run_clock(clock)
+                else:
+                    print("Invalid values.")
+            except ValueError:
+                print("Invalid input.")
+
+        elif choice == "3":
+            try:
+                h = int(input("Hours (0-23): "))
+                m = int(input("Minutes (0-59): "))
+                s = int(input("Seconds (0-59): "))
+                if 0 <= h < 24 and 0 <= m < 60 and 0 <= s < 60:
+                    clock.set_alarm((h, m, s))  # Passer le tuple directement ici
+                    run_clock(clock)
+                else:
+                    print("Invalid values.")
+            except ValueError:
+                print("Invalid input.")
+
+        elif choice == "4":
+            clock.toggle_mode()
+
+        elif choice == "5":
+            clock.toggle_pause()
+
+        elif choice == "6":
+            print("Goodbye!")
+            break
+
+        else:
+            print("Invalid choice.")
+
 
 if __name__ == "__main__":
-    app = HorlogeGUI()
-    try:
-        app.demarrer()
-    except KeyboardInterrupt:
-        app.arreter()
+    menu()

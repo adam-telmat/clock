@@ -2,128 +2,157 @@ import time
 from datetime import datetime, timedelta
 import threading
 
-class Horloge:
+class Clock:
     def __init__(self):
-        self.heure_actuelle = datetime.now()
-        self.alarme = None
+        """
+        Initializes the clock with the current time, no alarm, 24-hour mode, and not paused.
+        """
+        self.current_time = datetime.now()
+        self.alarm = None
         self.mode_12h = False
-        self.pause = False
+        self.paused = False
         self.is_running = False
 
-    def afficher_heure(self):
+    def display_time(self):
+        """
+        Continuously displays the current time, updating every second.
+        If an alarm is set, it will notify the user when the alarm time is reached.
+        """
         self.is_running = True
         self.pause_message_shown = False
         while self.is_running:
-            if not self.pause:
-                heure_affichee = self.heure_actuelle.strftime("%I:%M:%S %p" if self.mode_12h else "%H:%M:%S")
-                print(heure_affichee, end="\r")
-                
-                if self.alarme and self.heure_actuelle.strftime("%H:%M:%S") == self.alarme.strftime("%H:%M:%S"):
-                    print("\nDRING DRING ! C'est l'heure de l'alarme !")
-                    self.alarme = None  # Désactive l'alarme après qu'elle a sonné
-                
-                self.heure_actuelle += timedelta(seconds=1)
+            if not self.paused:
+                displayed_time = self.current_time.strftime("%I:%M:%S %p" if self.mode_12h else "%H:%M:%S")
+                print(displayed_time, end="\r")
+
+                if self.alarm and self.current_time.strftime("%H:%M:%S") == self.alarm.strftime("%H:%M:%S"):
+                    print("\nALARM! It's time!")
+                    self.alarm = None  # Disable the alarm after it rings
+
+                self.current_time += timedelta(seconds=1)
                 self.pause_message_shown = False
             else:
                 if not self.pause_message_shown:
-                    print(f"Horloge en pause - {self.heure_actuelle.strftime('%H:%M:%S')}", end="\r")
+                    print(f"Clock paused - {self.current_time.strftime('%H:%M:%S')}", end="\r")
                     self.pause_message_shown = True
-            
+
             time.sleep(1)
 
-    def regler_alarme(self, h, m, s):
-        self.alarme = self.heure_actuelle.replace(hour=h, minute=m, second=s)
-        print(f"Alarme réglée pour {h:02d}:{m:02d}:{s:02d}")
+    def set_alarm(self, h, m, s):
+        """
+        Sets an alarm for a specific time.
 
-    def changer_mode(self):
+        Args:
+            h (int): Hour (0-23)
+            m (int): Minute (0-59)
+            s (int): Second (0-59)
+        """
+        self.alarm = self.current_time.replace(hour=h, minute=m, second=s)
+        print(f"Alarm set for {h:02d}:{m:02d}:{s:02d}")
+
+    def toggle_mode(self):
+        """
+        Toggles the clock display mode between 12-hour and 24-hour formats.
+        """
         self.mode_12h = not self.mode_12h
-        mode = "12h" if self.mode_12h else "24h"
-        print(f"Mode changé en {mode}")
+        mode = "12-hour" if self.mode_12h else "24-hour"
+        # print(f"Mode changed to {mode}")
 
-    def basculer_pause(self):
-        self.pause = not self.pause
-        etat = "en pause" if self.pause else "en marche"
-        print(f"Horloge {etat}")
+    def toggle_pause(self):
+        """
+        Toggles the clock between paused and running states.
+        """
+        self.paused = not self.paused
+        state = "paused" if self.paused else "running"
+        print(f"Clock is now {state}")
 
-    def arreter_heure(self):
+    def stop_clock(self):
+        """
+        Stops the clock.
+        """
         self.is_running = False
 
 
-def lancer_horloge(horloge):
+def run_clock(clock):
     """
-    Permet de lancer l'horloge en continu après avoir réglé l'heure ou l'alarme.
-    L'utilisateur reste ici jusqu'à ce qu'il décide de revenir au menu principal.
+    Starts the clock in a continuous loop. The user can press Ctrl+C to stop and return to the menu.
+
+    Args:
+        clock (Clock): The clock object to run.
     """
-    print("Appuyez sur Ctrl+C pour revenir au menu")
+    print("Press Ctrl+C to return to the menu")
     try:
-        if not horloge.is_running:
-            thread_affichage = threading.Thread(target=horloge.afficher_heure)
-            thread_affichage.daemon = True
-            thread_affichage.start()
-        
+        if not clock.is_running:
+            display_thread = threading.Thread(target=clock.display_time)
+            display_thread.daemon = True
+            display_thread.start()
+
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        horloge.arreter_heure()
-        print("\nRetour au menu")
+        clock.stop_clock()
+        print("\nReturning to menu")
 
 
 def menu():
-    horloge = Horloge()
+    """
+    Displays the main menu for the clock program, allowing the user to choose various options.
+    """
+    clock = Clock()
 
     while True:
         print("\n=== MENU ===")
-        print("1. Afficher l'heure en temps réel")
-        print("2. Régler l'heure")
-        print("3. Régler l'alarme")
-        print("4. Changer le mode d'affichage (12h/24h)")
-        print("5. Mettre en pause/reprendre")
-        print("6. Quitter")
-        
-        choix = input("\nVotre choix : ")
-        
-        if choix == "1":
-            lancer_horloge(horloge)
+        print("1. Display the current time in real-time")
+        print("2. Set the time")
+        print("3. Set an alarm")
+        print("4. Change display mode (12-hour/24-hour)")
+        print("5. Pause/Resume the clock")
+        print("6. Exit")
 
-        elif choix == "2":
+        choice = input("\nYour choice: ")
+
+        if choice == "1":
+            run_clock(clock)
+
+        elif choice == "2":
             try:
-                h = int(input("Heures (0-23) : "))
-                m = int(input("Minutes (0-59) : "))
-                s = int(input("Secondes (0-59) : "))
+                h = int(input("Hours (0-23): "))
+                m = int(input("Minutes (0-59): "))
+                s = int(input("Seconds (0-59): "))
                 if 0 <= h < 24 and 0 <= m < 60 and 0 <= s < 60:
-                    horloge.heure_actuelle = horloge.heure_actuelle.replace(hour=h, minute=m, second=s)
-                    print("Heure réglée avec succès.")
-                    lancer_horloge(horloge)
+                    clock.current_time = clock.current_time.replace(hour=h, minute=m, second=s)
+                    print("Time successfully set.")
+                    run_clock(clock)
                 else:
-                    print("Valeurs invalides.")
+                    print("Invalid values.")
             except ValueError:
-                print("Entrée invalide.")
+                print("Invalid input.")
 
-        elif choix == "3":
+        elif choice == "3":
             try:
-                h = int(input("Heures (0-23) : "))
-                m = int(input("Minutes (0-59) : "))
-                s = int(input("Secondes (0-59) : "))
+                h = int(input("Hours (0-23): "))
+                m = int(input("Minutes (0-59): "))
+                s = int(input("Seconds (0-59): "))
                 if 0 <= h < 24 and 0 <= m < 60 and 0 <= s < 60:
-                    horloge.regler_alarme(h, m, s)
-                    lancer_horloge(horloge)
+                    clock.set_alarm(h, m, s)
+                    run_clock(clock)
                 else:
-                    print("Valeurs invalides.")
+                    print("Invalid values.")
             except ValueError:
-                print("Entrée invalide.")
+                print("Invalid input.")
 
-        elif choix == "4":
-            horloge.changer_mode()
+        elif choice == "4":
+            clock.toggle_mode()
 
-        elif choix == "5":
-            horloge.basculer_pause()
+        elif choice == "5":
+            clock.toggle_pause()
 
-        elif choix == "6":
-            print("Au revoir !")
+        elif choice == "6":
+            print("Goodbye!")
             break
 
         else:
-            print("Choix invalide")
+            print("Invalid choice.")
 
 
 if __name__ == "__main__":
