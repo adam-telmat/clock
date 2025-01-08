@@ -17,7 +17,7 @@ def set_alarm():
     alarm_time=input("Choose at what time the alarm should ring (HH:MM:SS): ")
 
     #Getting the hour, minutes, seconds from grandma's choice
-    alarm_hour=alarm_time[0:2]
+    alarm_hour=alarm_time[:2]
     alarm_minute=alarm_time[3:5]
     alarm_seconds=alarm_time[6:8]
 
