@@ -1,7 +1,14 @@
-import datetime as dt
+import datetime
+import time
+from datetime import timedelta
 
-actual_time = dt.datetime.now()
-print(actual_time)
+def actual_time():
+    try:
+        while True:
+            present_time = datetime.datetime.now()
+            print(present_time.strftime("%H:%M:%S"))
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nRetour au menu")
 
-print(actual_time.hour)
-print(actual_time.strftime("%A"))
+actual_time()
