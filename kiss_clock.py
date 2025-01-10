@@ -24,20 +24,21 @@ def capture_new_time():
         print("Valeurs invalides.")
     return new_time_tuple
 
-'''print(new_hour_tuple[0])
-print(new_hour_tuple[1])
-print(new_hour_tuple[2])'''
-
 
 def afficher_heure(new_hour_tuple):
     h = new_hour_tuple[0]
     m = new_hour_tuple[1]
     s = new_hour_tuple[2]
-    present_time = datetime.datetime.now()
-    current_time = present_time.replace(hour=h, minute=m, second=s)
+    system_time = datetime.datetime.now()
+    new_time = system_time.replace(hour=h, minute=m, second=s)
     print("Heure réglée avec succès.")
-    print(current_time.strftime("%H:%M:%S"))
-
+    try:
+        while True:
+            print(new_time.strftime("%H:%M:%S"))
+            time.sleep(1)
+            new_time = new_time + timedelta(seconds=1)
+    except KeyboardInterrupt:
+        print("\nRetour au menu")
 
 
 new_hour_tuple = capture_new_time()
