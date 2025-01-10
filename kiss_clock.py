@@ -2,17 +2,17 @@ import datetime
 import time
 from datetime import timedelta
 
-def current_time():
+def system_time():
     try:
         while True:
-            current_time = datetime.datetime.now()
-            print(current_time.strftime("%H:%M:%S"))
+            system_time = datetime.datetime.now()
+            print(system_time.strftime("%H:%M:%S"))
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nRetour au menu")
 
 
-#current_time()
+#system_time()
 
 def capture_new_time():
     h = int(input("Heures (0-23) : "))
@@ -25,10 +25,10 @@ def capture_new_time():
     return new_time_tuple
 
 
-def afficher_heure(new_hour_tuple):
-    h = new_hour_tuple[0]
-    m = new_hour_tuple[1]
-    s = new_hour_tuple[2]
+def afficher_heure(new_time_tuple):
+    h = new_time_tuple[0]
+    m = new_time_tuple[1]
+    s = new_time_tuple[2]
     system_time = datetime.datetime.now()
     new_time = system_time.replace(hour=h, minute=m, second=s)
     print("Heure réglée avec succès.")
@@ -41,5 +41,5 @@ def afficher_heure(new_hour_tuple):
         print("\nRetour au menu")
 
 
-new_hour_tuple = capture_new_time()
-afficher_heure(new_hour_tuple)
+new_time_tuple = capture_new_time()
+afficher_heure(new_time_tuple)
