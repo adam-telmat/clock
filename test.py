@@ -90,7 +90,7 @@ def executer_horloge(horloge):
         if not horloge.en_cours:
             # Démarrer un fil d'exécution pour faire fonctionner l'horloge en arrière-plan
             thread_affichage = threading.Thread(target=horloge.afficher_heure)
-            thread_affichage.daemon = True  # Démoniser le fil pour qu'il s'arrête lorsque le programme quitte
+            thread_affichage.daemon = True  # Daemoniser le fil pour qu'il s'arrête lorsque le programme quitte
             thread_affichage.start()
 
         while True:  # Boucle principale pour maintenir le programme en cours
