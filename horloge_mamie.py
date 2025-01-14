@@ -47,7 +47,7 @@ class Clock:
         Sets the time using a tuple (hours, minutes, seconds).
         This will convert the tuple into a datetime object.
         """
-        h, m, s = time_tuple  # Decompose the tuple into hours, minutes, and seconds
+        (h, m, s) = time_tuple  # Decompose the tuple into hours, minutes, and seconds
         self.current_time = self.current_time.replace(hour=h, minute=m, second=s)  # Set the time
         print(f"Time successfully set to {h:02d}:{m:02d}:{s:02d}")  # Display the updated time
 
@@ -55,7 +55,7 @@ class Clock:
         """
         Sets an alarm for a specific time using a tuple (hours, minutes, seconds).
         """
-        h, m, s = time_tuple  # Decompose the tuple to set the alarm time
+        (h, m, s) = time_tuple  # Decompose the tuple to set the alarm time
         self.alarm = self.current_time.replace(hour=h, minute=m, second=s)  # Set the alarm
         print(f"Alarm set for {h:02d}:{m:02d}:{s:02d}")  # Display the alarm time
 
